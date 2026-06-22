@@ -19,7 +19,16 @@ const jetbrainsMono = JetBrains_Mono({
   weight: ["400", "500", "700"],
 });
 
+// Resolve the deployed origin so Open Graph / Twitter image URLs are
+// absolute. Vercel injects these at build; localhost is the fallback.
+const siteUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
+  ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+  : process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : "http://localhost:3000";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: "Citi Sprints — The fastest Citi Bike riders in New York",
   description:
     "Upload your Citi Bike ride, get verified, and climb the leaderboard of the fastest riders in the city. An unofficial fan project.",
@@ -27,6 +36,13 @@ export const metadata: Metadata = {
     title: "Citi Sprints",
     description: "The fastest Citi Bike riders in New York City.",
     type: "website",
+    url: "/",
+    siteName: "Citi Sprints",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Citi Sprints",
+    description: "The fastest Citi Bike riders in New York City.",
   },
 };
 
