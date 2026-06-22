@@ -158,7 +158,7 @@ export function AddRideModal({
           </button>
         </div>
 
-        <div className="px-6 py-6">
+        <div className="pb-safe px-6 py-6 sm:pb-6">
           {step === "drop" ? (
             <DropStep
               dragging={dragging}

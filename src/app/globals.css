@@ -7,6 +7,9 @@
    orange reserved for the leader / crown.
    ─────────────────────────────────────────────────────────── */
 @theme {
+  /* Small-phone breakpoint (~iPhone SE width and up). */
+  --breakpoint-xs: 24rem;
+
   --color-ground: #eef1f6;
   --color-surface: #ffffff;
   --color-panel: #e4e9f2;
@@ -38,6 +41,8 @@
 html {
   background: var(--ground);
   -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
@@ -45,6 +50,23 @@ body {
   color: var(--text);
   font-family: var(--font-sans), system-ui, sans-serif;
   font-feature-settings: "cv05" 1, "cv11" 1;
+  /* No grey flash on tap; no rubber-band overscroll behind fixed UI. */
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+}
+
+/* iOS zooms the page when focusing a text field below 16px. Floor the
+   editable controls at 16px so the layout never jumps on focus. Buttons
+   are excluded — they don't trigger zoom and keep their own type scale. */
+input,
+textarea,
+select {
+  font-size: max(16px, 1em);
+}
+
+/* Pad past the iPhone home indicator on fixed bottom surfaces. */
+.pb-safe {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
 }
 
 /* Mono numerals get tabular figures so columns of speeds and

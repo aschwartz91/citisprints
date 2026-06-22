@@ -6,7 +6,7 @@ export function Nav({ onAddRide }: { onAddRide: () => void }) {
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5 sm:px-8">
         <a href="#top" className="flex items-center gap-2.5">
           <Wheel />
-          <span className="display text-[1.15rem] tracking-tight text-ink">
+          <span className="display text-base tracking-tight text-ink sm:text-[1.15rem]">
             CITI SPRINTS
           </span>
         </a>
@@ -26,9 +26,11 @@ export function Nav({ onAddRide }: { onAddRide: () => void }) {
           <button
             type="button"
             onClick={onAddRide}
-            className="inline-flex items-center gap-2 rounded-full bg-ink px-4 py-2.5 text-sm font-semibold text-white transition-transform hover:-translate-y-px active:translate-y-0"
+            className="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-ink px-4 py-2.5 text-sm font-semibold text-white transition-transform hover:-translate-y-px active:translate-y-0"
           >
-            <span className="text-accent-soft">+</span> Add your ride
+            <span className="text-accent-soft">+</span>
+            <span className="hidden xs:inline">Add your ride</span>
+            <span className="xs:hidden">Add ride</span>
           </button>
         </nav>
       </div>

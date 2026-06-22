@@ -19,7 +19,7 @@ export function Hero({
   return (
     <section id="top" className="relative overflow-hidden border-b border-hairline">
       <GridCanvas className="pointer-events-none absolute inset-0 h-full w-full" />
-      <div className="relative mx-auto grid max-w-6xl gap-12 px-5 py-16 sm:px-8 sm:py-24 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+      <div className="relative mx-auto grid max-w-6xl gap-10 px-5 py-12 sm:gap-12 sm:px-8 sm:py-24 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
         <div className="rise">
           <p className="eyebrow mb-5 flex items-center gap-2">
             <span className="inline-block h-1.5 w-1.5 rounded-full bg-flame" />
@@ -37,23 +37,23 @@ export function Hero({
             time, verify it&rsquo;s real, and drop you onto the leaderboard. Earn
             your spot — no bombing down the block.
           </p>
-          <div className="mt-8 flex flex-wrap items-center gap-3">
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
             <button
               type="button"
               onClick={onAddRide}
-              className="inline-flex items-center gap-2 rounded-full bg-accent px-6 py-3.5 text-base font-semibold text-white shadow-[0_8px_24px_-8px_rgba(26,86,219,0.6)] transition-transform hover:-translate-y-0.5 active:translate-y-0"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-accent px-6 py-4 text-base font-semibold text-white shadow-[0_8px_24px_-8px_rgba(26,86,219,0.6)] transition-transform hover:-translate-y-0.5 active:translate-y-0 sm:w-auto sm:py-3.5"
             >
               Add your ride
               <span aria-hidden="true">→</span>
             </button>
             <a
               href="#board"
-              className="inline-flex items-center rounded-full border border-hairline-strong px-6 py-3.5 text-base font-semibold text-ink transition-colors hover:bg-surface"
+              className="inline-flex w-full items-center justify-center rounded-full border border-hairline-strong px-6 py-4 text-base font-semibold text-ink transition-colors hover:bg-surface sm:w-auto sm:py-3.5"
             >
               See the board
             </a>
           </div>
-          <dl className="mt-10 flex gap-8">
+          <dl className="mt-10 flex flex-wrap gap-x-8 gap-y-4">
             <Stat label="Riders" value={riderCount.toString()} />
             <Stat label="Rides logged" value={rideCount.toString()} />
             <Stat

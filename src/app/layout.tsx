@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Archivo, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -44,6 +44,17 @@ export const metadata: Metadata = {
     title: "Citi Sprints",
     description: "The fastest Citi Bike riders in New York City.",
   },
+};
+
+// Mobile-first: most riders arrive on a phone. Tint the browser
+// chrome to match the ground, draw under the notch (viewport-fit),
+// and keep pinch-zoom available for accessibility.
+export const viewport: Viewport = {
+  themeColor: "#eef1f6",
+  colorScheme: "light",
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

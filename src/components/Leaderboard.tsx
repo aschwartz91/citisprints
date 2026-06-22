@@ -74,7 +74,7 @@ function Tabs({
           role="tab"
           aria-selected={board === b}
           onClick={() => onChange(b)}
-          className={`rounded-full px-5 py-2 text-sm font-semibold transition-colors ${
+          className={`rounded-full px-5 py-2.5 text-sm font-semibold transition-colors ${
             board === b
               ? "bg-surface text-ink shadow-sm"
               : "text-muted hover:text-ink"

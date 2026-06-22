@@ -6,6 +6,7 @@ import { Hero } from "@/components/Hero";
 import { Leaderboard } from "@/components/Leaderboard";
 import { HowItWorks } from "@/components/HowItWorks";
 import { Footer } from "@/components/Footer";
+import { MobileCTA } from "@/components/MobileCTA";
 import { AddRideModal, type SubmitResult } from "@/components/AddRideModal";
 import type { Ride } from "@/lib/types";
 import { addRide, getAllRides, rankings } from "@/lib/store";
@@ -76,6 +77,9 @@ export default function Home() {
         <HowItWorks />
       </main>
       <Footer />
+      {/* Spacer so the fixed mobile action bar never hides the footer. */}
+      <div className="h-20 sm:hidden" aria-hidden="true" />
+      <MobileCTA onAddRide={openModal} hidden={modalOpen} />
       {modalOpen ? (
         <AddRideModal
           onClose={() => setModalOpen(false)}
