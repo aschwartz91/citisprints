@@ -1,4 +1,6 @@
 import { ImageResponse } from "next/og";
+import { join } from "node:path";
+import { readFile } from "node:fs/promises";
 
 export const alt =
   "Citi Sprints — the fastest Citi Bike riders in New York City";
@@ -8,7 +10,15 @@ export const contentType = "image/png";
 // Social share card. Mirrors the app's race-board look: cool ground,
 // deep ink type, Citi azure, one warm flame accent on the leader.
 // Uses the runtime default font (no network fetch at build).
-export default function OpengraphImage() {
+export default async function OpengraphImage() {
+  // The City Sprinters wordmark, embedded as a data URI so it renders in the
+  // Node.js runtime with no network fetch. (Asset path is project-root-relative.)
+  const logoData = await readFile(
+    join(process.cwd(), "public/city-sprinters-logo.png"),
+    "base64",
+  );
+  const logoSrc = `data:image/png;base64,${logoData}`;
+
   return new ImageResponse(
     (
       <div
@@ -68,20 +78,8 @@ export default function OpengraphImage() {
             <span style={{ color: "#1c2e6b" }}>five boroughs.</span>
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-            <div
-              style={{
-                width: 34,
-                height: 34,
-                borderRadius: 99,
-                border: "4px solid #1c2e6b",
-                display: "flex",
-              }}
-            />
-            <div style={{ fontSize: 34, fontWeight: 800, letterSpacing: -1 }}>
-              CITY SPRINTERS
-            </div>
-          </div>
+          {/* The real City Sprinters wordmark (1100×235), scaled to height 60 */}
+          <img src={logoSrc} width={281} height={60} alt="City Sprinters" />
         </div>
 
         {/* Right: the current leader card */}
