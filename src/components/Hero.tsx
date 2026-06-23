@@ -30,12 +30,11 @@ export function Hero({
             <br />
             riders in the
             <br />
-            <span className="text-accent">five boroughs.</span>
+            <span className="text-[#39a7e8]">five boroughs.</span>
           </h1>
           <p className="mt-6 max-w-md text-lg leading-relaxed text-muted">
             Upload a screenshot of your Citi Bike ride. We read the distance and
-            time, verify it&rsquo;s real, and drop you onto the leaderboard. Earn
-            your spot — no bombing down the block.
+            time, verify it&rsquo;s real, and drop you onto the leaderboard.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
             <button
@@ -48,7 +47,7 @@ export function Hero({
             </button>
             <a
               href="#board"
-              className="inline-flex w-full items-center justify-center rounded-full border border-hairline-strong px-6 py-4 text-base font-semibold text-ink transition-colors hover:bg-surface sm:w-auto sm:py-3.5"
+              className="inline-flex w-full items-center justify-center rounded-full border border-hairline-strong bg-surface px-6 py-4 text-base font-semibold text-ink transition-colors hover:bg-panel sm:w-auto sm:py-3.5"
             >
               See the board
             </a>

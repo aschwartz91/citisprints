@@ -7,6 +7,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { readRideImage } from "@/lib/ocr";
 import { BikeMark } from "./BikeMark";
 import { Confetti } from "./Confetti";
+import { shareStatsCard } from "@/lib/shareCard";
 import {
   MIN_DISTANCE_MI,
   formatDuration,
@@ -498,6 +499,28 @@ function DoneStep({
   handle: string;
   onClose: () => void;
 }) {
+  const [sharing, setSharing] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  const onShare = async () => {
+    if (sharing) return;
+    setSharing(true);
+    setSaved(false);
+    try {
+      const outcome = await shareStatsCard({
+        handle,
+        speedMph: result.speedMph,
+        fastestRank: result.fastestRank,
+        longestRank: result.longestRank,
+      });
+      if (outcome === "downloaded") setSaved(true);
+    } catch {
+      // non-fatal — the card just didn't share
+    } finally {
+      setSharing(false);
+    }
+  };
+
   return (
     <div className="py-2 text-center">
       <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-accent/10 text-accent">
@@ -505,6 +528,9 @@ function DoneStep({
       </div>
       <p className="mt-4 text-lg font-semibold text-ink">
         Welcome to the board, @{handle}.
+      </p>
+      <p className="mt-1 text-sm text-muted">
+        These are your bragging rights. Go rub it in.
       </p>
       <div className="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-hairline bg-hairline">
         <RankCell label="Fastest" rank={result.fastestRank} />
@@ -515,12 +541,39 @@ function DoneStep({
       </p>
       <button
         type="button"
+        onClick={onShare}
+        disabled={sharing}
+        className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-accent px-6 py-3.5 text-base font-semibold text-white transition-transform enabled:hover:-translate-y-0.5 disabled:opacity-60"
+      >
+        <ShareIcon />
+        {sharing
+          ? "Preparing your card…"
+          : saved
+            ? "Saved — share it anywhere"
+            : "Share your bragging rights"}
+      </button>
+      <button
+        type="button"
         onClick={onClose}
-        className="mt-6 w-full rounded-full bg-ink px-6 py-3.5 text-base font-semibold text-white"
+        className="mt-3 w-full rounded-full border border-hairline-strong px-6 py-3 text-base font-semibold text-ink transition-colors hover:bg-panel"
       >
         See where you landed
       </button>
     </div>
+  );
+}
+
+function ShareIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M12 3v13M12 3L8 7m4-4l4 4M5 13v6a2 2 0 002 2h10a2 2 0 002-2v-6"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }
 

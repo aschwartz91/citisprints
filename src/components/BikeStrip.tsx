@@ -9,7 +9,7 @@ export function BikeStrip({ leaderMph }: { leaderMph: number | null }) {
   const mph = leaderMph ?? 16;
   // Faster leader → quicker crossing and quicker spin. Clamped so it always
   // reads as smooth motion (and the two stay roughly in step).
-  const travelSeconds = Math.max(6, Math.min(12, 150 / mph));
+  const travelSeconds = Math.max(3, Math.min(6, 75 / mph));
   const spinSeconds = Math.max(0.5, Math.min(2, 26 / mph));
 
   return (
