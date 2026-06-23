@@ -13,23 +13,19 @@ export function BikeStrip({ leaderMph }: { leaderMph: number | null }) {
   const spinSeconds = Math.max(0.5, Math.min(2, 26 / mph));
 
   return (
-    <div className="relative overflow-hidden border-b border-hairline bg-ground">
+    <div
+      aria-hidden="true"
+      className="relative overflow-hidden border-b border-hairline bg-ground"
+    >
       {/* the road */}
-      <div
-        aria-hidden="true"
-        className="absolute inset-x-0 bottom-8 h-px bg-hairline-strong sm:bottom-10"
-      />
+      <div className="absolute inset-x-0 bottom-8 h-px bg-hairline-strong sm:bottom-10" />
       <div className="relative h-24 sm:h-32">
-        {/* The riding bike doubles as an easter egg: click it to hop over to
-         *  the City Sprinters story page. */}
-        <a
-          href="https://adamschwar.tz/citisprinters"
-          aria-label="City Sprinters"
-          className="cs-ride absolute bottom-3 left-0 block w-40 cursor-pointer rounded-lg outline-none transition-transform hover:-translate-y-1 focus-visible:ring-2 focus-visible:ring-accent sm:bottom-4 sm:w-56"
+        <div
+          className="cs-ride absolute bottom-3 left-0 w-40 sm:bottom-4 sm:w-56"
           style={{ "--cs-travel": `${travelSeconds}s` } as CSSProperties}
         >
           <BikeMark spinSeconds={spinSeconds} />
-        </a>
+        </div>
       </div>
     </div>
   );
