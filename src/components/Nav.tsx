@@ -4,11 +4,13 @@ export function Nav({ onAddRide }: { onAddRide: () => void }) {
   return (
     <header className="sticky top-0 z-30 border-b border-hairline bg-ground/80 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5 sm:px-8">
-        <a href="#top" className="flex items-center gap-2.5">
-          <Wheel />
-          <span className="display text-base tracking-tight text-ink sm:text-[1.15rem]">
-            CITI SPRINTS
-          </span>
+        <a href="#top" className="flex items-center" aria-label="City Sprinters — home">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/city-sprinters-logo.png"
+            alt="City Sprinters"
+            className="h-7 w-auto sm:h-8"
+          />
         </a>
         <nav className="flex items-center gap-1 sm:gap-4">
           <a
@@ -35,20 +37,5 @@ export function Nav({ onAddRide }: { onAddRide: () => void }) {
         </nav>
       </div>
     </header>
-  );
-}
-
-function Wheel() {
-  return (
-    <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
-      <circle cx="13" cy="13" r="11" stroke="var(--color-accent)" strokeWidth="2" />
-      <circle cx="13" cy="13" r="2.4" fill="var(--color-accent)" />
-      <path
-        d="M13 13 L13 3.2 M13 13 L21.5 18"
-        stroke="var(--color-flame)"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-    </svg>
   );
 }

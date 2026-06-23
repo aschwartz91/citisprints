@@ -29,19 +29,19 @@ const siteUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: "Citi Sprints — The fastest Citi Bike riders in New York",
+  title: "City Sprinters — The fastest Citi Bike riders in New York",
   description:
     "Upload your Citi Bike ride, get verified, and climb the leaderboard of the fastest riders in the city. An unofficial fan project.",
   openGraph: {
-    title: "Citi Sprints",
+    title: "City Sprinters",
     description: "The fastest Citi Bike riders in New York City.",
     type: "website",
     url: "/",
-    siteName: "Citi Sprints",
+    siteName: "City Sprinters",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Citi Sprints",
+    title: "City Sprinters",
     description: "The fastest Citi Bike riders in New York City.",
   },
 };

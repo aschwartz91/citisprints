@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Nav } from "@/components/Nav";
 import { Hero } from "@/components/Hero";
+import { BikeStrip } from "@/components/BikeStrip";
+import { BikeMarquee } from "@/components/BikeMarquee";
 import { Leaderboard } from "@/components/Leaderboard";
 import { HowItWorks } from "@/components/HowItWorks";
 import { Footer } from "@/components/Footer";
@@ -77,9 +79,11 @@ export default function Home() {
           rideCount={rides.length}
           onAddRide={openModal}
         />
+        <BikeStrip leaderMph={leader ? leader.topSpeedMph : null} />
         <Leaderboard rides={rides} justAddedHandle={justAddedHandle} />
         <HowItWorks />
       </main>
+      <BikeMarquee />
       <Footer />
       {/* Spacer so the fixed mobile action bar never hides the footer. */}
       <div className="h-20 sm:hidden" aria-hidden="true" />

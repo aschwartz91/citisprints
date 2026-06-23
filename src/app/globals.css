@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /* ───────────────────────────────────────────────────────────
-   Citi Sprints — design tokens
+   City Sprinters — design tokens
    A race-classification board for the city. Cool blue-grey
    field, deep ink type, vivid Citi azure, one warm signal
    orange reserved for the leader / crown.
@@ -135,6 +135,43 @@ select {
 
 .rise {
   animation: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* The riding bike band under the hero: a bike crosses the strip on a loop
+   while its wheels spin, both paced by the leader's mph (--cs-travel and
+   --cs-spin). The reduced-motion rule further down parks it, centered. */
+@keyframes cs-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes cs-ride {
+  from {
+    transform: translateX(-130%);
+  }
+  to {
+    transform: translateX(130vw);
+  }
+}
+
+.cs-wheel {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: cs-spin var(--cs-spin, 1.4s) linear infinite;
+}
+
+.cs-ride {
+  animation: cs-ride var(--cs-travel, 9s) linear infinite;
+}
+
+/* Reduced motion: don't leave the band empty (the bike would freeze
+   off-screen). Park it visibly in the centre with still wheels instead. */
+@media (prefers-reduced-motion: reduce) {
+  .cs-ride {
+    left: 50%;
+    transform: translateX(-50%);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

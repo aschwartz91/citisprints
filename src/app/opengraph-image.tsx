@@ -79,7 +79,7 @@ export default function OpengraphImage() {
               }}
             />
             <div style={{ fontSize: 34, fontWeight: 800, letterSpacing: -1 }}>
-              CITI SPRINTS
+              CITY SPRINTERS
             </div>
           </div>
         </div>

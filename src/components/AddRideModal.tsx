@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 // (the parent renders it conditionally), so React's own mount/unmount
 // resets all state — no reset effect required.
 import { readRideImage } from "@/lib/ocr";
+import { BikeMark } from "./BikeMark";
 import {
   MIN_DISTANCE_MI,
   formatDuration,
@@ -323,13 +324,18 @@ function ReadingStep({
       <p className="mt-1 text-sm text-muted">
         Pulling the distance and time from the image.
       </p>
-      <div className="mt-5 h-1.5 w-full overflow-hidden rounded-full bg-panel">
+      {/* The bike rides the length of the track as OCR progresses — wheels
+          spinning, leading edge parked at the current percentage. */}
+      <div className="relative mt-5 h-14 w-full">
+        <div className="absolute inset-x-0 bottom-1.5 h-px bg-hairline-strong" />
         <div
-          className="h-full rounded-full bg-accent transition-[width] duration-200"
-          style={{ width: `${Math.max(6, pct)}%` }}
-        />
+          className="absolute bottom-0 w-16 transition-[left,transform] duration-200 ease-linear"
+          style={{ left: `${pct}%`, transform: `translateX(-${pct}%)` }}
+        >
+          <BikeMark spinSeconds={0.6} />
+        </div>
       </div>
-      <p className="tnum mt-2 text-xs text-faint">{pct}%</p>
+      <p className="tnum mt-1 text-xs text-faint">{pct}%</p>
     </div>
   );
 }

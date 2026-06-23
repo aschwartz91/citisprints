@@ -1,4 +1,4 @@
-# Citi Sprints
+# City Sprinters
 
 **The fastest Citi Bike riders in New York City.** Upload a screenshot of your
 ride, get it read and verified automatically, pick a handle, and climb the
