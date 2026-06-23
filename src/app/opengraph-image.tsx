@@ -116,14 +116,14 @@ export default async function OpengraphImage() {
           <div style={{ display: "flex", flexDirection: "column" }}>
             <div style={{ display: "flex", alignItems: "flex-end", gap: 10 }}>
               <span style={{ fontSize: 104, fontWeight: 800, lineHeight: 1 }}>
-                20.8
+                18.6
               </span>
               <span style={{ fontSize: 34, color: "#8b97a8", paddingBottom: 12 }}>
                 mph
               </span>
             </div>
             <div style={{ fontSize: 30, fontWeight: 700, marginTop: 14 }}>
-              @flatiron_flyer
+              @hudson_hammer
             </div>
             <div style={{ fontSize: 22, color: "#56657c", marginTop: 4 }}>
               Hudson River Greenway
@@ -141,11 +141,11 @@ export default async function OpengraphImage() {
             }}
           >
             <div style={{ display: "flex", gap: 8 }}>
-              <span style={{ color: "#0b1726", fontWeight: 700 }}>4.2</span>
+              <span style={{ color: "#0b1726", fontWeight: 700 }}>4.3</span>
               <span>mi</span>
             </div>
             <div style={{ display: "flex", gap: 8 }}>
-              <span style={{ color: "#0b1726", fontWeight: 700 }}>12:07</span>
+              <span style={{ color: "#0b1726", fontWeight: 700 }}>13:52</span>
             </div>
           </div>
         </div>

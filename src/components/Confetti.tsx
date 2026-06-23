@@ -28,15 +28,16 @@ export function Confetti({ count = 28 }: { count?: number }) {
     setPieces(
       Array.from({ length: count }, () => {
         const angle = Math.random() * Math.PI * 2;
-        const dist = 140 + Math.random() * 320;
+        const dist = 180 + Math.random() * 520;
         return {
-          tx: Math.round(Math.cos(angle) * dist),
-          ty: Math.round(Math.sin(angle) * dist + 220 + Math.random() * 360),
-          peak: -Math.round(140 + Math.random() * 200),
+          // Wider horizontal throw so the burst scatters across the screen.
+          tx: Math.round(Math.cos(angle) * dist * 1.45),
+          ty: Math.round(Math.sin(angle) * dist + 180 + Math.random() * 460),
+          peak: -Math.round(120 + Math.random() * 260),
           r: Math.round(Math.random() * 1080 - 540),
-          w: Math.round(22 + Math.random() * 26),
-          dur: Math.round(1200 + Math.random() * 800),
-          delay: Math.round(Math.random() * 140),
+          w: Math.round(20 + Math.random() * 28),
+          dur: Math.round(1200 + Math.random() * 900),
+          delay: Math.round(Math.random() * 200),
         };
       }),
     );
