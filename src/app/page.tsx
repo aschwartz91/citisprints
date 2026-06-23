@@ -21,11 +21,16 @@ export default function Home() {
   const [justAddedHandle, setJustAddedHandle] = useState<string | null>(null);
 
   useEffect(() => {
-    // Fold in localStorage-backed rides after mount. This must run
-    // post-hydration (localStorage is client-only), so a one-time
-    // setState here is the intended pattern, not an avoidable cascade.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setRides(getAllRides());
+    // Fold in the Supabase-backed rides after mount. The first paint uses the
+    // deterministic seed set (so server and client agree); once the network
+    // round-trip resolves we replace it with seeds + everyone's posted rides.
+    let active = true;
+    getAllRides().then((all) => {
+      if (active) setRides(all);
+    });
+    return () => {
+      active = false;
+    };
   }, []);
 
   const fastest = useMemo(() => rankings(rides, "fastest"), [rides]);
@@ -36,14 +41,13 @@ export default function Home() {
   );
 
   const handleSubmit = useCallback(
-    (input: {
+    async (input: {
       handle: string;
       distanceMi: number;
       durationSec: number;
-      route: string;
-    }): SubmitResult => {
-      addRide(input);
-      const next = getAllRides();
+    }): Promise<SubmitResult> => {
+      await addRide(input);
+      const next = await getAllRides();
       setRides(next);
       setJustAddedHandle(input.handle);
       const fastestRank =

@@ -30,23 +30,27 @@ export function AddRideModal({
     handle: string;
     distanceMi: number;
     durationSec: number;
-    route: string;
-  }) => SubmitResult;
+  }) => Promise<SubmitResult>;
 }) {
   const [step, setStep] = useState<Step>("drop");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
   const [isCitiBike, setIsCitiBike] = useState(false);
   const [autoRead, setAutoRead] = useState(false);
+  // Values read straight off the screenshot are locked — the whole point of
+  // uploading is that the numbers can't be hand-edited. A field only stays
+  // editable when OCR couldn't read it, so a bad read never blocks a post.
+  const [distanceLocked, setDistanceLocked] = useState(false);
+  const [durationLocked, setDurationLocked] = useState(false);
   const [dragging, setDragging] = useState(false);
 
   const [distanceInput, setDistanceInput] = useState("");
   const [durationInput, setDurationInput] = useState("");
-  const [route, setRoute] = useState("");
   const [handle, setHandle] = useState("");
 
   const [result, setResult] = useState<SubmitResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Lock background scroll + close on Escape, for the modal's lifetime.
@@ -77,9 +81,14 @@ export function AddRideModal({
       const parsed = await readRideImage(file, setProgress);
       setIsCitiBike(parsed.isCitiBike);
       setAutoRead(parsed.distanceMi !== null || parsed.durationSec !== null);
-      if (parsed.distanceMi !== null) setDistanceInput(String(parsed.distanceMi));
-      if (parsed.durationSec !== null)
+      if (parsed.distanceMi !== null) {
+        setDistanceInput(String(parsed.distanceMi));
+        setDistanceLocked(true);
+      }
+      if (parsed.durationSec !== null) {
         setDurationInput(formatDuration(parsed.durationSec));
+        setDurationLocked(true);
+      }
       setStep("review");
     } catch {
       setError("We couldn't read that image. Enter your numbers by hand.");
@@ -112,16 +121,27 @@ export function AddRideModal({
   const canSubmit =
     hasDistance && hasDuration && !belowThreshold && cleanHandle.length >= 2;
 
-  const submit = () => {
-    if (!canSubmit || durationSec === null) return;
-    const res = onSubmit({
-      handle: cleanHandle,
-      distanceMi,
-      durationSec,
-      route,
-    });
-    setResult(res);
-    setStep("done");
+  const submit = async () => {
+    if (!canSubmit || durationSec === null || submitting) return;
+    setSubmitting(true);
+    setError(null);
+    try {
+      const res = await onSubmit({
+        handle: cleanHandle,
+        distanceMi,
+        durationSec,
+      });
+      setResult(res);
+      setStep("done");
+    } catch (e) {
+      setError(
+        e instanceof Error
+          ? e.message
+          : "We couldn't post your ride. Check your connection and try again.",
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -181,14 +201,15 @@ export function AddRideModal({
               error={error}
               distanceInput={distanceInput}
               durationInput={durationInput}
-              route={route}
+              distanceLocked={distanceLocked}
+              durationLocked={durationLocked}
               handle={handle}
               liveSpeed={liveSpeed}
               belowThreshold={belowThreshold}
               canSubmit={canSubmit}
+              submitting={submitting}
               onDistance={setDistanceInput}
               onDuration={setDurationInput}
-              onRoute={setRoute}
               onHandle={setHandle}
               onSubmit={submit}
             />
@@ -320,14 +341,15 @@ function ReviewStep({
   error,
   distanceInput,
   durationInput,
-  route,
+  distanceLocked,
+  durationLocked,
   handle,
   liveSpeed,
   belowThreshold,
   canSubmit,
+  submitting,
   onDistance,
   onDuration,
-  onRoute,
   onHandle,
   onSubmit,
 }: {
@@ -337,14 +359,15 @@ function ReviewStep({
   error: string | null;
   distanceInput: string;
   durationInput: string;
-  route: string;
+  distanceLocked: boolean;
+  durationLocked: boolean;
   handle: string;
   liveSpeed: number | null;
   belowThreshold: boolean;
   canSubmit: boolean;
+  submitting: boolean;
   onDistance: (v: string) => void;
   onDuration: (v: string) => void;
-  onRoute: (v: string) => void;
   onHandle: (v: string) => void;
   onSubmit: () => void;
 }) {
@@ -370,25 +393,29 @@ function ReviewStep({
       {error ? <p className="mt-3 text-sm text-flame">{error}</p> : null}
 
       <div className="mt-5 grid grid-cols-2 gap-3">
-        <Field label="Distance (mi)">
-          <input
-            inputMode="decimal"
-            value={distanceInput}
-            onChange={(e) => onDistance(e.target.value)}
-            placeholder="2.4"
-            className="tnum w-full rounded-lg border border-hairline-strong bg-ground px-3 py-2.5 text-lg font-bold text-ink outline-none focus:border-accent"
-          />
-        </Field>
-        <Field label="Time (mm:ss)">
-          <input
-            inputMode="numeric"
-            value={durationInput}
-            onChange={(e) => onDuration(e.target.value)}
-            placeholder="9:42"
-            className="tnum w-full rounded-lg border border-hairline-strong bg-ground px-3 py-2.5 text-lg font-bold text-ink outline-none focus:border-accent"
-          />
-        </Field>
+        <MetricField
+          label="Distance (mi)"
+          locked={distanceLocked}
+          value={distanceInput}
+          onChange={onDistance}
+          placeholder="2.4"
+          inputMode="decimal"
+        />
+        <MetricField
+          label="Time (mm:ss)"
+          locked={durationLocked}
+          value={durationInput}
+          onChange={onDuration}
+          placeholder="9:42"
+          inputMode="numeric"
+        />
       </div>
+      {distanceLocked || durationLocked ? (
+        <p className="mt-2 flex items-center gap-1.5 text-xs text-faint">
+          <LockGlyph />
+          Read from your screenshot — locked so the board stays honest.
+        </p>
+      ) : null}
 
       <div className="mt-3 flex items-center justify-between rounded-lg border border-hairline bg-panel/50 px-4 py-3">
         <span className="text-sm font-medium text-muted">Average speed</span>
@@ -406,15 +433,6 @@ function ReviewStep({
       ) : null}
 
       <div className="mt-4 grid gap-3">
-        <Field label="Route or neighborhood (optional)">
-          <input
-            value={route}
-            onChange={(e) => onRoute(e.target.value)}
-            placeholder="Hudson River Greenway"
-            maxLength={40}
-            className="w-full rounded-lg border border-hairline-strong bg-ground px-3 py-2.5 text-ink outline-none focus:border-accent"
-          />
-        </Field>
         <Field label="Your handle">
           <div className="flex items-center rounded-lg border border-hairline-strong bg-ground focus-within:border-accent">
             <span className="pl-3 text-faint">@</span>
@@ -431,10 +449,10 @@ function ReviewStep({
 
       <button
         type="submit"
-        disabled={!canSubmit}
+        disabled={!canSubmit || submitting}
         className="mt-6 w-full rounded-full bg-accent px-6 py-3.5 text-base font-semibold text-white transition-transform enabled:hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-40"
       >
-        Post to the leaderboard
+        {submitting ? "Posting…" : "Post to the leaderboard"}
       </button>
     </form>
   );
@@ -522,6 +540,80 @@ function Field({
       <span className="eyebrow mb-1.5 block">{label}</span>
       {children}
     </label>
+  );
+}
+
+/** A metric (distance/time) that is either an editable input — when OCR
+ *  couldn't read it — or a locked, read-only display when it came straight
+ *  from the uploaded screenshot. */
+function MetricField({
+  label,
+  locked,
+  value,
+  onChange,
+  placeholder,
+  inputMode,
+}: {
+  label: string;
+  locked: boolean;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder: string;
+  inputMode: "decimal" | "numeric";
+}) {
+  if (locked) {
+    return (
+      <Field label={label}>
+        <div
+          aria-readonly="true"
+          title="Read from your screenshot — can't be edited"
+          className="tnum flex w-full items-center justify-between rounded-lg border border-hairline bg-panel/60 px-3 py-2.5 text-lg font-bold text-ink"
+        >
+          <span>{value}</span>
+          <LockGlyph />
+        </div>
+      </Field>
+    );
+  }
+  return (
+    <Field label={label}>
+      <input
+        inputMode={inputMode}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="tnum w-full rounded-lg border border-hairline-strong bg-ground px-3 py-2.5 text-lg font-bold text-ink outline-none focus:border-accent"
+      />
+    </Field>
+  );
+}
+
+function LockGlyph() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+      className="shrink-0 text-faint"
+    >
+      <rect
+        x="5"
+        y="11"
+        width="14"
+        height="9"
+        rx="2"
+        stroke="currentColor"
+        strokeWidth="2"
+      />
+      <path
+        d="M8 11V8a4 4 0 1 1 8 0v3"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
   );
 }
 

@@ -29,7 +29,15 @@ export function parseRideText(text: string): ParsedRide {
   const raw = text ?? "";
   const lower = raw.toLowerCase();
 
-  const isCitiBike = /citi\s*bike|citibike|\blyft\b/.test(lower);
+  // A real Citi Bike / Lyft ride receipt. The brand name often isn't in the
+  // shot (e.g. the "Your Trip" e-bike receipt), so we also accept the phrases
+  // unique to these bikeshare summaries: unlock fees, e-bike line items, the
+  // points system, and the "ride ended" / "member fare" headers.
+  const isCitiBike =
+    /citi\s*bike|citibike|\blyft\b/.test(lower) ||
+    /e-?bike|free unlock|classic bike|pickup points|points for this ride|ride ended|member fare/.test(
+      lower,
+    );
 
   // Distance: a number followed by a miles unit. Allow "ml"/"mi"/"mile(s)".
   let distanceMi: number | null = null;
@@ -39,18 +47,38 @@ export function parseRideText(text: string): ParsedRide {
     if (!Number.isNaN(v) && v > 0 && v < 200) distanceMi = v;
   }
 
-  // Duration. Prefer h:mm:ss, then mm:ss, then "N min".
-  let durationSec: number | null = null;
-  const hms = raw.match(/\b(\d{1,2}):(\d{2}):(\d{2})\b/);
-  const ms = raw.match(/\b(\d{1,3}):(\d{2})\b/);
-  const mins = lower.match(/(\d+)\s*min/);
-  if (hms) {
-    durationSec = +hms[1] * 3600 + +hms[2] * 60 + +hms[3];
-  } else if (ms) {
-    durationSec = +ms[1] * 60 + +ms[2];
-  } else if (mins) {
-    durationSec = +mins[1] * 60;
-  }
+  // Duration. Ride summaries render this as text ("7 min", "1 hr 7 min"),
+  // so trust that first. The colon times that otherwise trip up parsing are
+  // almost always the phone's status-bar clock (e.g. "9:11"), which sits on
+  // the first line — so we strip that line before considering a colon time.
+  const body = raw.replace(/^.*(\r?\n|$)/, "");
+  const durationSec = readDuration(body) ?? readDuration(raw);
 
   return { distanceMi, durationSec, isCitiBike, rawText: raw };
+}
+
+/** Parse an elapsed time out of a chunk of OCR text, in the order ride
+ *  summaries can be trusted: spelled-out hours/minutes/seconds first, then
+ *  a colon time (h:mm:ss, then mm:ss) as a fallback. Returns null on no hit. */
+function readDuration(text: string): number | null {
+  const t = text.toLowerCase();
+
+  // "1 hr 7 min 30 sec" and any subset of it.
+  const hr = t.match(/(\d+)\s*(?:hours?|hrs?)\b/);
+  const min = t.match(/(\d+)\s*(?:minutes?|mins?)\b/);
+  const sec = t.match(/(\d+)\s*(?:seconds?|secs?)\b/);
+  if (hr || min || sec) {
+    return (
+      (hr ? +hr[1] * 3600 : 0) +
+      (min ? +min[1] * 60 : 0) +
+      (sec ? +sec[1] : 0)
+    );
+  }
+
+  const hms = t.match(/\b(\d{1,2}):(\d{2}):(\d{2})\b/);
+  if (hms) return +hms[1] * 3600 + +hms[2] * 60 + +hms[3];
+  const ms = t.match(/\b(\d{1,3}):(\d{2})\b/);
+  if (ms) return +ms[1] * 60 + +ms[2];
+
+  return null;
 }

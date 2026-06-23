@@ -109,9 +109,6 @@ function LeaderCard({ leader }: { leader: Standing }) {
           <span className="display text-2xl text-faint">mph</span>
         </div>
         <p className="mt-3 text-xl font-semibold text-ink">@{leader.handle}</p>
-        <p className="mt-1 flex items-center gap-1.5 text-sm text-muted">
-          <Pin /> {leader.route}
-        </p>
       </div>
 
       <div className="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-hairline bg-hairline">
@@ -154,16 +151,3 @@ function Crown() {
   );
 }
 
-function Pin() {
-  return (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path
-        d="M12 22s7-7.6 7-13a7 7 0 10-14 0c0 5.4 7 13 7 13z"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinejoin="round"
-      />
-      <circle cx="12" cy="9" r="2.4" fill="currentColor" />
-    </svg>
-  );
-}

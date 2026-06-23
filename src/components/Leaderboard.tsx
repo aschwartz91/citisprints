@@ -66,7 +66,7 @@ function Tabs({
     <div
       role="tablist"
       aria-label="Leaderboard view"
-      className="inline-flex rounded-full border border-hairline bg-panel p-1"
+      className="inline-flex self-start rounded-full border border-hairline bg-panel p-1 sm:self-auto"
     >
       {(["fastest", "longest"] as const).map((b) => (
         <button
@@ -157,7 +157,6 @@ function Row({
               </span>
             ) : null}
           </p>
-          <p className="truncate text-xs text-muted">{standing.route}</p>
         </div>
       </div>
 

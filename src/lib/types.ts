@@ -5,8 +5,6 @@ export type Ride = {
   distanceMi: number;
   /** Elapsed time in seconds. */
   durationSec: number;
-  /** Neighborhood / route label, e.g. "Hudson River Greenway". */
-  route: string;
   createdAt: number;
   source: "seed" | "user";
 };
@@ -14,7 +12,6 @@ export type Ride = {
 /** A rider's standing on a leaderboard, after aggregation. */
 export type Standing = {
   handle: string;
-  route: string;
   /** Best single-ride average speed in mph. */
   topSpeedMph: number;
   /** Cumulative distance across qualifying rides. */

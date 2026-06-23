@@ -1,49 +1,59 @@
 import type { Board, Ride, Standing } from "./types";
 import { MIN_DISTANCE_MI, speedMph } from "./format";
 import { SEED_RIDES } from "./mockData";
+import { supabase, type RideRow } from "./supabase";
 
-const STORAGE_KEY = "citi-sprints/rides/v1";
+function rowToRide(row: RideRow): Ride {
+  return {
+    id: row.id,
+    handle: row.handle,
+    distanceMi: row.distance_mi,
+    durationSec: row.duration_sec,
+    createdAt: new Date(row.created_at).getTime(),
+    source: "user",
+  };
+}
 
-/** User-submitted rides only — seeds are constant and never stored. */
-function loadUserRides(): Ride[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw) as Ride[];
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
+/** User-submitted rides from Supabase. Seeds are constant and never stored. */
+async function loadUserRides(): Promise<Ride[]> {
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from("rides")
+    .select("id, handle, distance_mi, duration_sec, created_at")
+    .order("created_at", { ascending: false });
+  if (error) {
+    console.error("Failed to load rides from Supabase:", error.message);
     return [];
   }
+  return (data ?? []).map(rowToRide);
 }
 
-function saveUserRides(rides: Ride[]): void {
-  if (typeof window === "undefined") return;
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(rides));
+export async function getAllRides(): Promise<Ride[]> {
+  const userRides = await loadUserRides();
+  return [...SEED_RIDES, ...userRides];
 }
 
-export function getAllRides(): Ride[] {
-  return [...SEED_RIDES, ...loadUserRides()];
-}
-
-export function addRide(input: {
+export async function addRide(input: {
   handle: string;
   distanceMi: number;
   durationSec: number;
-  route: string;
-}): Ride {
-  const ride: Ride = {
-    id: `user-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-    handle: input.handle,
-    distanceMi: input.distanceMi,
-    durationSec: input.durationSec,
-    route: input.route.trim() || "Somewhere in the city",
-    createdAt: Date.now(),
-    source: "user",
-  };
-  const next = [...loadUserRides(), ride];
-  saveUserRides(next);
-  return ride;
+}): Promise<Ride> {
+  if (!supabase) {
+    throw new Error("Supabase is not configured — cannot save the ride.");
+  }
+  const { data, error } = await supabase
+    .from("rides")
+    .insert({
+      handle: input.handle,
+      distance_mi: input.distanceMi,
+      duration_sec: input.durationSec,
+    })
+    .select("id, handle, distance_mi, duration_sec, created_at")
+    .single();
+  if (error || !data) {
+    throw new Error(error?.message ?? "Failed to save the ride.");
+  }
+  return rowToRide(data);
 }
 
 /** Aggregate rides into per-rider standings for a given board.
@@ -72,7 +82,6 @@ export function rankings(rides: Ride[], board: Board): Standing[] {
     }
     standings.push({
       handle,
-      route: best.route,
       topSpeedMph: bestSpeed,
       totalDistanceMi: total,
       bestDistanceMi: best.distanceMi,
