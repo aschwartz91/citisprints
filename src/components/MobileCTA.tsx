@@ -39,7 +39,7 @@ export function MobileCTA({
         type="button"
         onClick={onAddRide}
         tabIndex={visible ? 0 : -1}
-        className="flex w-full items-center justify-center gap-2 rounded-full bg-accent px-6 py-4 text-base font-semibold text-white shadow-[0_8px_24px_-8px_rgba(26,86,219,0.6)] active:scale-[0.99]"
+        className="flex w-full items-center justify-center gap-2 rounded-full bg-accent px-6 py-4 text-base font-semibold text-white shadow-[0_8px_24px_-8px_rgba(28,46,107,0.6)] active:scale-[0.99]"
       >
         Add your ride
         <span aria-hidden="true">→</span>

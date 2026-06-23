@@ -38,7 +38,7 @@ export default function OpengraphImage() {
                 width: 14,
                 height: 14,
                 borderRadius: 99,
-                background: "#ff5a1f",
+                background: "#e61623",
               }}
             />
             <div
@@ -65,7 +65,7 @@ export default function OpengraphImage() {
           >
             <span>The fastest</span>
             <span>riders in the</span>
-            <span style={{ color: "#1a56db" }}>five boroughs.</span>
+            <span style={{ color: "#1c2e6b" }}>five boroughs.</span>
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
@@ -74,7 +74,7 @@ export default function OpengraphImage() {
                 width: 34,
                 height: 34,
                 borderRadius: 99,
-                border: "4px solid #1a56db",
+                border: "4px solid #1c2e6b",
                 display: "flex",
               }}
             />
@@ -103,8 +103,8 @@ export default function OpengraphImage() {
               alignItems: "center",
               alignSelf: "flex-start",
               gap: 8,
-              background: "rgba(255,90,31,0.10)",
-              color: "#ff5a1f",
+              background: "rgba(230,22,35,0.10)",
+              color: "#e61623",
               padding: "8px 14px",
               borderRadius: 99,
               fontSize: 18,

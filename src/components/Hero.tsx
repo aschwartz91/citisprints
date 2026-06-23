@@ -41,7 +41,7 @@ export function Hero({
             <button
               type="button"
               onClick={onAddRide}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-accent px-6 py-4 text-base font-semibold text-white shadow-[0_8px_24px_-8px_rgba(26,86,219,0.6)] transition-transform hover:-translate-y-0.5 active:translate-y-0 sm:w-auto sm:py-3.5"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-accent px-6 py-4 text-base font-semibold text-white shadow-[0_8px_24px_-8px_rgba(28,46,107,0.6)] transition-transform hover:-translate-y-0.5 active:translate-y-0 sm:w-auto sm:py-3.5"
             >
               Add your ride
               <span aria-hidden="true">→</span>

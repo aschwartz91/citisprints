@@ -2,35 +2,71 @@
 
 import { useEffect, useRef } from "react";
 
-/** A generated abstract Manhattan street grid — avenues, cross
- *  streets, a Broadway-style diagonal, and one highlighted route.
- *  Purely atmospheric; drawn faint so type stays legible. */
+type Pt = [number, number];
+
+/** Normalized (0–1) grid-aligned routes. The highlighted line traces one,
+ *  holds, fades, then moves on to the next — cycling forever. */
+const PATHS: Pt[][] = [
+  [
+    [0.1, 0.92],
+    [0.1, 0.62],
+    [0.34, 0.62],
+    [0.34, 0.34],
+    [0.6, 0.34],
+    [0.6, 0.1],
+  ],
+  [
+    [0.06, 0.22],
+    [0.3, 0.22],
+    [0.3, 0.5],
+    [0.56, 0.5],
+    [0.56, 0.8],
+    [0.88, 0.8],
+  ],
+  [
+    [0.92, 0.14],
+    [0.64, 0.14],
+    [0.64, 0.46],
+    [0.4, 0.46],
+    [0.4, 0.74],
+    [0.14, 0.74],
+  ],
+];
+
+const easeInOut = (t: number) =>
+  t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+
+/** A generated abstract Manhattan street grid — avenues, cross streets, a
+ *  Broadway-style diagonal, and one highlighted route that animates along a
+ *  few different paths. Drawn faint so the hero type stays fully legible. */
 export function GridCanvas({ className }: { className?: string }) {
   const ref = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     const canvas = ref.current;
-    if (!canvas) return;
-    const parent = canvas.parentElement;
-    if (!parent) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    const parent = canvas?.parentElement;
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !parent || !ctx) return;
 
-    const draw = () => {
+    let w = 0;
+    let h = 0;
+    const resize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      const w = parent.clientWidth;
-      const h = parent.clientHeight;
-      if (w === 0 || h === 0) return;
+      w = parent.clientWidth;
+      h = parent.clientHeight;
       canvas.width = w * dpr;
       canvas.height = h * dpr;
       canvas.style.width = `${w}px`;
       canvas.style.height = `${h}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+    resize();
+    const ro = new ResizeObserver(resize);
+    ro.observe(parent);
+
+    const gap = 48;
+    const drawGrid = () => {
       ctx.clearRect(0, 0, w, h);
-
-      const gap = 48;
-
-      // Cross streets + avenues.
       ctx.lineWidth = 1;
       ctx.strokeStyle = "rgba(11,23,38,0.055)";
       for (let x = (w % gap) / 2; x <= w; x += gap) {
@@ -45,58 +81,119 @@ export function GridCanvas({ className }: { className?: string }) {
         ctx.lineTo(w, y);
         ctx.stroke();
       }
-
       // Broadway — the diagonal that cuts the grid.
-      ctx.strokeStyle = "rgba(26,86,219,0.10)";
+      ctx.strokeStyle = "rgba(28,46,107,0.07)";
       ctx.lineWidth = 1.5;
       ctx.beginPath();
       ctx.moveTo(w * 0.02, h + 30);
       ctx.lineTo(w * 0.78, -30);
       ctx.stroke();
-
-      // A highlighted route, snapping along the grid like real
-      // turn-by-turn directions, ending on a flame finish node.
-      const pts: [number, number][] = [
-        [w * 0.12, h * 0.86],
-        [w * 0.12, h * 0.58],
-        [w * 0.38, h * 0.58],
-        [w * 0.38, h * 0.3],
-        [w * 0.66, h * 0.3],
-        [w * 0.66, h * 0.12],
-      ];
-      ctx.strokeStyle = "rgba(26,86,219,0.32)";
-      ctx.lineWidth = 2.5;
-      ctx.lineJoin = "round";
-      ctx.lineCap = "round";
-      ctx.beginPath();
-      pts.forEach(([x, y], i) =>
-        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y),
-      );
-      ctx.stroke();
-
-      // Start node.
-      const [sx, sy] = pts[0];
-      ctx.fillStyle = "rgba(26,86,219,0.9)";
-      ctx.beginPath();
-      ctx.arc(sx, sy, 4, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Finish node — the one warm spot of color.
-      const [fx, fy] = pts[pts.length - 1];
-      ctx.fillStyle = "rgba(255,90,31,0.16)";
-      ctx.beginPath();
-      ctx.arc(fx, fy, 11, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = "#ff5a1f";
-      ctx.beginPath();
-      ctx.arc(fx, fy, 5, 0, Math.PI * 2);
-      ctx.fill();
     };
 
-    draw();
-    const ro = new ResizeObserver(draw);
-    ro.observe(parent);
-    return () => ro.disconnect();
+    const toPx = (path: Pt[]): Pt[] => path.map(([fx, fy]) => [fx * w, fy * h]);
+    const lengths = (pts: Pt[]) => {
+      const segs: number[] = [];
+      let total = 0;
+      for (let i = 1; i < pts.length; i++) {
+        const l = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
+        segs.push(l);
+        total += l;
+      }
+      return { segs, total };
+    };
+
+    // Draw a route up to fraction p of its length, scaled by alpha (for fades).
+    const drawRoute = (pts: Pt[], p: number, alpha: number) => {
+      const { segs, total } = lengths(pts);
+      const target = p * total;
+      ctx.lineJoin = "round";
+      ctx.lineCap = "round";
+
+      // Faint full-path ghost so the route reads ahead of the moving head.
+      ctx.strokeStyle = `rgba(28,46,107,${0.045 * alpha})`;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      pts.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
+      ctx.stroke();
+
+      // The drawn trail (kept faint so type stays readable).
+      ctx.strokeStyle = `rgba(28,46,107,${0.16 * alpha})`;
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.moveTo(pts[0][0], pts[0][1]);
+      let acc = 0;
+      let head: Pt = pts[0];
+      for (let i = 1; i < pts.length; i++) {
+        const l = segs[i - 1];
+        if (acc + l <= target) {
+          ctx.lineTo(pts[i][0], pts[i][1]);
+          head = pts[i];
+          acc += l;
+        } else {
+          const t = (target - acc) / l;
+          head = [
+            pts[i - 1][0] + (pts[i][0] - pts[i - 1][0]) * t,
+            pts[i - 1][1] + (pts[i][1] - pts[i - 1][1]) * t,
+          ];
+          ctx.lineTo(head[0], head[1]);
+          break;
+        }
+      }
+      ctx.stroke();
+
+      // Moving head dot while drawing.
+      if (p < 1) {
+        ctx.fillStyle = `rgba(28,46,107,${0.5 * alpha})`;
+        ctx.beginPath();
+        ctx.arc(head[0], head[1], 3.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Finish node — the one warm spot of color — once the route completes.
+      if (p > 0.999) {
+        const [fx, fy] = pts[pts.length - 1];
+        ctx.fillStyle = `rgba(230,22,35,${0.16 * alpha})`;
+        ctx.beginPath();
+        ctx.arc(fx, fy, 11, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = `rgba(230,22,35,${alpha})`;
+        ctx.beginPath();
+        ctx.arc(fx, fy, 5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    };
+
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) {
+      drawGrid();
+      drawRoute(toPx(PATHS[0]), 1, 1);
+      return () => ro.disconnect();
+    }
+
+    const DRAW = 2600;
+    const HOLD = 1100;
+    const FADE = 800;
+    const cycle = DRAW + HOLD + FADE;
+    let raf = 0;
+    let start: number | null = null;
+
+    const render = (now: number) => {
+      if (start === null) start = now;
+      const e = now - start;
+      drawGrid();
+      const pts = toPx(PATHS[Math.floor(e / cycle) % PATHS.length]);
+      const ph = e % cycle;
+      if (ph < DRAW) drawRoute(pts, easeInOut(ph / DRAW), 1);
+      else if (ph < DRAW + HOLD) drawRoute(pts, 1, 1);
+      else drawRoute(pts, 1, 1 - (ph - DRAW - HOLD) / FADE);
+      raf = requestAnimationFrame(render);
+    };
+    raf = requestAnimationFrame(render);
+
+    return () => {
+      ro.disconnect();
+      cancelAnimationFrame(raf);
+    };
   }, []);
 
   return <canvas ref={ref} aria-hidden="true" className={className} />;

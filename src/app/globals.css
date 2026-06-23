@@ -16,9 +16,9 @@
   --color-ink: #0b1726;
   --color-muted: #56657c;
   --color-faint: #8b97a8;
-  --color-accent: #1a56db;
-  --color-accent-soft: #dbe5fb;
-  --color-flame: #ff5a1f;
+  --color-accent: #1c2e6b;
+  --color-accent-soft: #dce2f2;
+  --color-flame: #e61623;
   --color-hairline: rgba(11, 23, 38, 0.1);
   --color-hairline-strong: rgba(11, 23, 38, 0.16);
 
@@ -30,8 +30,8 @@
 :root {
   --ground: #eef1f6;
   --text: #0b1726;
-  --accent: #1a56db;
-  --accent-2: #ff5a1f;
+  --accent: #1c2e6b;
+  --accent-2: #e61623;
 }
 
 * {
@@ -163,6 +163,34 @@ select {
 
 .cs-ride {
   animation: cs-ride var(--cs-travel, 9s) linear infinite;
+}
+
+/* One-shot confetti burst when a ride posts: pop out, arc up, fall and fade. */
+@keyframes cs-confetti {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  40% {
+    transform: translate3d(calc(var(--tx) * 0.55), var(--peak), 0)
+      rotate(calc(var(--r) * 0.45));
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(var(--tx), var(--ty), 0) rotate(var(--r));
+    opacity: 0;
+  }
+}
+
+.cs-confetti-piece {
+  position: absolute;
+  top: 42%;
+  left: 50%;
+  animation: cs-confetti var(--dur, 1500ms) cubic-bezier(0.18, 0.7, 0.4, 1)
+    var(--delay, 0ms) both;
 }
 
 /* Reduced motion: don't leave the band empty (the bike would freeze

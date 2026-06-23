@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 // resets all state — no reset effect required.
 import { readRideImage } from "@/lib/ocr";
 import { BikeMark } from "./BikeMark";
+import { Confetti } from "./Confetti";
 import {
   MIN_DISTANCE_MI,
   formatDuration,
@@ -152,6 +153,7 @@ export function AddRideModal({
         if (e.target === e.currentTarget) onClose();
       }}
     >
+      {step === "done" ? <Confetti /> : null}
       <div
         role="dialog"
         aria-modal="true"
